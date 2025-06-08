@@ -1,5 +1,5 @@
 CREATE TABLE businesses (
-    bussiness_id BIGINT NOT NULL IDENTITY(1,1),
+    business_id BIGINT NOT NULL IDENTITY(1,1),
     name NVARCHAR(255) NOT NULL,
     description NVARCHAR(MAX),
     address NVARCHAR(MAX),
