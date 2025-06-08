@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+# Define the name of the database to create or connect to
+#!/usr/bin/env bash
+>>>>>>> 859dfc0 (Fix permissions table definition and set default timestamps; update database creation script for clarity)
 DatabaseName="your_database_name"
 # Check if the database exists, and create it if it doesn't
 echo "Checking if database '$DatabaseName' exists..."
@@ -11,5 +16,9 @@ fi
 # Usage instructions
 # Ensure you have PostgreSQL installed and configured.
 # Run this script with appropriate permissions to create a database.
+<<<<<<< HEAD
 # Example: ./start-DB.sh
 
+=======
+# Example: ./start-DB.sh
+>>>>>>> 859dfc0 (Fix permissions table definition and set default timestamps; update database creation script for clarity)
