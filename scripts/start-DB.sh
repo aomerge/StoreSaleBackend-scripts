@@ -6,6 +6,7 @@ DatabaseName=()
 for dir in ../db/*/; do
     if [ -d "${dir}tables" ]; then
         sql_directories+=("${dir}tables")
+        sql_tables+=("$(basename "$dir")")
     fi
 done
 
@@ -57,9 +58,9 @@ function search_sql_files() {
         return 1
         exit 1
     else
-        sql_tables+=("$input_files")
+        sql_tables+=("$input_files")        
         echo "📁 Archivos encontrados:"
-        echo "$input_files" | while IFS= read -r file; do
+        echo "$input_files" | while IFS= read -r file; do                        
             echo "  ✓ $file"
         done
     fi
@@ -86,14 +87,13 @@ function find_config_file() {
     local config_file="./obs/connect.sh"
     if [ -f "$config_file" ]; then
         source "$config_file"
-        chmod 744 "$config_file"
-        ./obs/connect.sh --type="$type_env"
+        chmod 744 "$config_file"        
+        ./obs/connect.sh --type="$type_env" --tables "${sql_tables[@]}"
         if [ $? -ne 0 ]; then
             echo "❌ Error: No se pudo conectar a la base de datos."
             exit 1
             return 1
         fi
-        
     else
         echo "❌ Error: No se encontró el archivo de configuración $config_file"
         exit 1
@@ -101,10 +101,9 @@ function find_config_file() {
 }
 
 ui_elements "$@"
-find_config_file
 check_sql_files
+find_config_file
 check_database_name
-
 
 
 
