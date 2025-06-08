@@ -9,7 +9,7 @@ CREATE TABLE permissions (
 
     CONSTRAINT fk_permissions_user_group
         FOREIGN KEY (userGroup_id)
-        REFERENCES user_groups (user_group_id) ¿
+        REFERENCES user_groups (user_group_id)
         ON DELETE CASCADE,
         
     CONSTRAINT fk_permissions_module_name
