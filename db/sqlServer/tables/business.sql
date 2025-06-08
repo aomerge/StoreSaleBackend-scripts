@@ -7,7 +7,7 @@ CREATE TABLE businesses (
     email NVARCHAR(255),
     created_at DATETIME2 NOT NULL,
     updated_at DATETIME2 NOT NULL,
-    CONSTRAINT PK_businesses PRIMARY KEY (bussiness_id),
+    CONSTRAINT PK_businesses PRIMARY KEY (business_id),
     CONSTRAINT UQ_businesses_name UNIQUE (name),
     CONSTRAINT UQ_businesses_email UNIQUE (email) -- Asumiendo que el email del negocio debe ser único
 );

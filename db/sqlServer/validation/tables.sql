@@ -7,6 +7,6 @@ BEGIN
 END
 ELSE
 BEGIN
-    RAISERROR('Error: The users table already exists in the dbo schema', 16, 1)
+    RAISERROR('Error: The %s table already exists in the dbo schema', 16, 1, @TableName)
 END
 GO
