@@ -13,11 +13,7 @@ done
 function ui_elements (){
     for arg in "$@"
     do
-        case $arg in
-            --db=*)
-                DatabaseName="${arg#*=}"
-                shift
-            ;;
+        case $arg in            
             --type=*)
                 type_env="${arg#*=}"
                 shift
@@ -75,20 +71,13 @@ function check_sql_files() {
     done
 }
 
-function check_database_name() {
-    if [ -z "$DatabaseName" ]; then
-        echo "Error: No se proporcionó el nombre de la base de datos."
-        print_usage
-        exit 1
-    fi
-}
 
 function find_config_file() {
-    local config_file="./obs/connect.sh"
+    local config_file="./obs/find_config_file.sh"
     if [ -f "$config_file" ]; then
         source "$config_file"
         chmod 744 "$config_file"        
-        ./obs/connect.sh --type="$type_env" --tables "${sql_tables[@]}"
+        ./obs/find_config_file.sh --type="$type_env" --tables "${sql_tables[@]}"
         if [ $? -ne 0 ]; then
             echo "❌ Error: No se pudo conectar a la base de datos."
             exit 1
@@ -103,7 +92,6 @@ function find_config_file() {
 ui_elements "$@"
 check_sql_files
 find_config_file
-check_database_name
 
 
 

@@ -8,25 +8,24 @@ function ui_elements (){
     do
         case $arg in
             --type=*)
-                echo "Tipo de conexión: ${arg#*=}"
+                echo "Tipo de configuración: ${arg#*=}"
                 filter_files "${arg#*=}"            
                 shift
             ;;
             --tables)
-                shift
-                TableName=()
+                shift                
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
                     TableName+=("$1")
                     shift
                 done
-                #echo "Tablas especificadas: ${TableName[@]}"
-                exit 1
+                connect_to_db
+                #echo "Tablas especificadas: ${TableName[@]}"                
             ;;
             *)
-                echo "Argumento no reconocido: $arg"
+                echo "Argumento no reconocido: $1"
                 echo "Uso: $0 [db=database_name]"
                 exit 1
-            ;;
+                ;;
         esac
     done
 }
@@ -42,9 +41,9 @@ function find_files_java() {
             echo "No se pudo extraer el nombre de la base de datos."
             exit 1
         fi
-        DatabaseName="$database_name"
-        username=$(echo "$file_content" | grep "username" | sed 's/.*=//')
-        password=$(echo "$file_content" | grep "password" | sed 's/.*=//')
+        DatabaseName+="$database_name"
+        username+=$(echo "$file_content" | grep "username" | sed 's/.*=//')
+        password+=$(echo "$file_content" | grep "password" | sed 's/.*=//')
         #echo "Usuario: $username"
         #echo "Contraseña: ${password[@]}"
         #echo DatabaseName="$DatabaseName"
@@ -58,6 +57,7 @@ function filter_files() {
         "java")
             echo "Buscando archivos de base de datos..."
             find_files_java
+            echo "done"
             ;;
         "php")
             echo "Buscando archivos de API..."
@@ -75,17 +75,41 @@ function filter_files() {
 }
 
 connect_to_db() {
+    echo "Conectando a la base de datos..."
+    #echo "$DatabaseName"
     if [ -z "$DatabaseName" ]; then
-        echo "❌ Error: No se proporcionó el nombre de la base de datos."
-        echo "   Asegúrate de que el archivo .properties contenga la información correcta."
+        echo "Error: No se proporcionó el nombre de la base de datos."
         exit 1
     fi
+    
+    # Validate if database connection parameters are available
+    if [ -z "$username" ] || [ -z "$password" ]; then
+        echo "Error: Credenciales de base de datos incompletas."
+        exit 1
+    fi
+    
+    
 
-    echo "Conectando a la base de datos: $DatabaseName"
+    ./obs/connect_to_db.sh --db="$DatabaseName" --user="$username" --password="$password" "${TableName[@]}"
+    if [ $? -ne 0 ]; then
+        echo "❌ Error: No se pudo conectar a la base de datos."
+        exit 1
+    fi
+    echo "✅ Conexión exitosa a la base de datos: $DatabaseName"
+    echo "Tablas especificadas: ${TableName[@]}"
     echo "Usuario: $username"
     echo "Contraseña: $password"
-    # Aquí iría el comando para conectarse a la base de datos, por ejemplo:
-    # psql -U "$username" -d "$DatabaseName" -W "$password"
+    echo "done"
+    echo "Conexión a la base de datos completada."
+    echo "Puedes continuar con las operaciones de la base de datos."
+    echo "Si necesitas realizar más operaciones, puedes ejecutar el script nuevamente con los parámetros adecuados."
+    echo "Para más información, consulta la documentación del script."
+    echo "Gracias por usar este script. ¡Hasta luego!"
+    echo "done"
+    echo "----------------------------------------"
+    echo "Conexión a la base de datos finalizada."
+    echo "----------------------------------------"
+    
 }
 
 ui_elements "$@"
