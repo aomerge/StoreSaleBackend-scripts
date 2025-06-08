@@ -10,6 +10,6 @@ CREATE TABLE user_groups (
         ON DELETE CASCADE, -- O la acción que prefieras ON DELETE/ON UPDATE
     CONSTRAINT fk_user_groups_group
         FOREIGN KEY (group_id)
-        REFERENCES groups (id) -- Asumiendo que la PK de 'groups' es 'id'
-        ON DELETE CASCADE  -- O la acción que prefieras ON DELETE/ON UPDATE
+        REFERENCES groups (group_id) 
+        ON DELETE CASCADE  
 );
