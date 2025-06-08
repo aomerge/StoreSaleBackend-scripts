@@ -13,9 +13,18 @@ function ui_elements (){
     for arg in "$@"
     do
         case $arg in
-            db=*)
+            --db=*)
                 DatabaseName="${arg#*=}"
                 shift
+            ;;
+            --type=*)
+                type_env="${arg#*=}"
+                shift
+            ;;
+            *)
+                echo "Argumento no reconocido: $arg"
+                echo "Uso: $0 [db=database_name]"
+                exit 1
             ;;
         esac
     done
@@ -73,7 +82,26 @@ function check_database_name() {
     fi
 }
 
+function find_config_file() {
+    local config_file="./obs/connect.sh"
+    if [ -f "$config_file" ]; then
+        source "$config_file"
+        chmod 744 "$config_file"
+        ./obs/connect.sh --type="$type_env"
+        if [ $? -ne 0 ]; then
+            echo "❌ Error: No se pudo conectar a la base de datos."
+            exit 1
+            return 1
+        fi
+        
+    else
+        echo "❌ Error: No se encontró el archivo de configuración $config_file"
+        exit 1
+    fi    
+}
+
 ui_elements "$@"
+find_config_file
 check_sql_files
 check_database_name
 
