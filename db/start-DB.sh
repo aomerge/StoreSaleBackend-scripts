@@ -14,3 +14,4 @@ fi
 # Ensure you have PostgreSQL installed and configured.
 # Run this script with appropriate permissions to create a database.
 # Example: ./start-DB.sh
+
