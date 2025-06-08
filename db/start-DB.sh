@@ -1,5 +1,3 @@
-# Define the name of the database to create or connect to
-#!/usr/bin/env bash
 DatabaseName="your_database_name"
 # Check if the database exists, and create it if it doesn't
 echo "Checking if database '$DatabaseName' exists..."

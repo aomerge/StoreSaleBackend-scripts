@@ -1,14 +1,14 @@
 -- Check if the table already exists and create only if it doesn't
 -- Usage: Provide the value for the $(TableName) variable when running this script using SQLCMD or a compatible tool.
 -- Example: sqlcmd -v TableName="YourTableName" -i tables.sql
-DECLARE @DatabaseName NVARCHAR(128) = '$(DatabaseName)';
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = @DatabaseName)
+DECLARE @TableName NVARCHAR(128) = '$(TableName)';
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = @TableName AND schema_id = SCHEMA_ID('dbo'))
 BEGIN
-    -- Create the database only if it doesn't exist
+    -- Create the users table only if it doesn't exist
     PRINT 'done'
-    PRINT 'Creating database...'
+    PRINT 'Creating users table...'
 END
 ELSE
 BEGIN
-    RAISERROR('Error: The %s database already exists', 16, 1, @DatabaseName)
+    RAISERROR('Error: The users table already exists in the dbo schema', 16, 1)
 END
