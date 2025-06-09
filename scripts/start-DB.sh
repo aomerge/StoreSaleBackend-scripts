@@ -2,13 +2,14 @@
 sql_directories=()
 sql_tables=()
 DatabaseName=()
+type_database=()
 
 for dir in ../db/*/; do
     if [ -d "${dir}tables" ]; then
         sql_directories+=("${dir}tables")
-        sql_tables+=("$(basename "$dir")")
+        type_database+=("$(basename "$dir")")
     fi
-done
+done    
 
 function ui_elements (){
     for arg in "$@"
@@ -44,9 +45,9 @@ function search_sql_files() {
     echo "🔍 Procesando base de datos: $db_type"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-    sql_tables+=("$db_type")
     input_files=$(find "$dir" -maxdepth 1 -type f -name "*.sql" -exec basename {} \;)
     input_files=$(echo "$input_files" | sed 's/\.sql//g')    
+    sql_tables+=("$db_type")
 
     if [ -z "$input_files" ]; then
         echo "❌ Error: No se encontraron archivos SQL en $dir"
@@ -68,20 +69,19 @@ function check_sql_files() {
     for dir in "${sql_directories[@]}"; do
         db_type=$(basename "$(dirname "$dir")")
         search_sql_files "$dir" "$db_type"
-    done
+    done        
 }
-
-
 function find_config_file() {
     local config_file="./obs/find_config_file.sh"
-    if [ -f "$config_file" ]; then
-        source "$config_file"
-        chmod 744 "$config_file"        
-        ./obs/find_config_file.sh --type="$type_env" --tables "${sql_tables[@]}"
+    if [ -f "$config_file" ]; then                
+        chmod +x "$config_file"        
+        "$config_file" --type="$type_env" --tables "${sql_tables[@]}" --type_db "${type_database[@]}" --db="${DatabaseName[@]}"        
         if [ $? -ne 0 ]; then
-            echo "❌ Error: No se pudo conectar a la base de datos."
+            echo "❌ Error: No se pudo ejecutar el script de configuración."
             exit 1
-            return 1
+        else            
+            #echo "Después del source: ${type_database[@]} mmmmmmmmmmmmmmmm"
+            echo "✅ Configuración completada exitosamente."
         fi
     else
         echo "❌ Error: No se encontró el archivo de configuración $config_file"
@@ -89,28 +89,7 @@ function find_config_file() {
     fi    
 }
 
+
 ui_elements "$@"
 check_sql_files
 find_config_file
-
-
-
-
-
-
-
-
-# # Check if DatabaseName was provided
-# if [ -z "$DatabaseName" ]; then
-#     echo "Error: Database name not provided. Usage: $0 db=database_name"
-#     exit 1
-# fi
-
-# echo "Checking if database '$DatabaseName' exists..."
-# if psql -lqt | cut -d \| -f 1 | grep -qw "$DatabaseName"; then
-#     echo "Database '$DatabaseName' already exists."
-# else
-#     echo "Database '$DatabaseName' does not exist. Creating it..."
-#     createdb "$DatabaseName"
-#     echo "Database '$DatabaseName' created successfully."
-# fi
