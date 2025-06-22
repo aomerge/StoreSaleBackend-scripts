@@ -18,8 +18,7 @@ function ui_elements (){
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
                     type_database+=("$1")
                     shift
-                done
-                echo "Después del source: ${type_database[@]} ---------------"                
+                done                
                 
             ;;
             --tables)
@@ -78,6 +77,29 @@ function filter_files() {
     esac    
 }
 
+function parcer_data_input(){
+    # Iterate through each database
+        DatabaseName=($(echo "${DatabaseName[@]}" | tr ' ' '\n' | sort -u))  # Remove duplicates and sort
+        echo ""
+        echo "----------${username[0]}"
+        echo "----------${username[1]}"
+        echo "----------${username[2]}"
+        echo ""
+        echo "+++++++++${password[0]}"
+        echo "+++++++++${password[1]}"
+        echo "+++++++++${password[2]}"
+        echo ""
+        echo "---${DatabaseName[@]}"
+        echo "----------------------------"
+        echo "----------${type_database[0]}"
+        echo "----------${type_database[1]}"
+        echo "----------${type_database[2]}"
+        echo "----------------------------"
+        echo "---Conectando a lasdatos 1: ${DatabaseName[0]}"
+        echo "---Conectando a lasdatos 2: ${DatabaseName[1]}"
+        echo "---Conectando a lasdatos 3: ${DatabaseName[2]}"
+}
+
 function connect_to_db() {
     echo "Conectando a la base de datos..."
     #echo "$DatabaseName"
@@ -94,12 +116,12 @@ function connect_to_db() {
     local config_file="./obs/connect_to_db.sh"
 
     if [ -f "$config_file" ]; then
-        chmod +x "$config_file"
-        echo "Después del source: ${type_database[@]} ------++++---------"
-        # Iterate through each database
+        chmod +x "$config_file"                
+        parcer_data_input        
         for i in "${!DatabaseName[@]}"; do
+            echo "Conectando a las bases de datos: ${DatabaseName[$i]} - [$i]"
             if [ ${#type_database[@]} -gt 0 ]; then
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type_db "${type_database[@]}" --tables "${TableName[@]}"
+                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[@]}" --tables "${TableName[@]}"
             else
                 "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --tables "${TableName[@]}"
             fi

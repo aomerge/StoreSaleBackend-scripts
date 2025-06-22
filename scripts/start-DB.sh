@@ -9,6 +9,8 @@ for dir in ../db/*/; do
         sql_directories+=("${dir}tables")
         type_database+=("$(basename "$dir")")
     fi
+    echo "Directorio encontrado: $dir"
+    echo "Directorio encontrado: ${type_database[@]}"
 done    
 
 function ui_elements (){

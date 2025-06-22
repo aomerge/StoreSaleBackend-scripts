@@ -33,17 +33,30 @@ function ui_elements (){
                 done
                 #echo "Tablas especificadas: ${TableName[@]}"
             ;;
-            --type=*)
+            --type)
                 shift
-                type_database="${arg#*=}"
+                type_database=()
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
-                    TableName+=("$1")
+                    type_database+=("$1")
                     shift
                 done
-                echo "Tipo de base de datos: $type_database"
+                echo "Tipo de base de datos: ${type_database[@]}"                
             ;;
         esac
     done
+}
+
+
+
+function check_type_database() {
+    if [[ "${type_database[@]}" == "postgress" ]]; then
+        find_files_java            
+    elif [[ "${type_database[@]}" == "sqlserver" ]]; then
+        find_files_sqlserver    
+    else
+        echo "Tipo de base de datos no soportado: ${type_database[@]}"
+        exit 1
+    fi
 }
 
 ui_elements "$@"
