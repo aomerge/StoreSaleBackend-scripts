@@ -3,6 +3,7 @@ DatabaseName=()
 username=()
 password=()
 type_database=()
+
 function ui_elements (){
     for arg in "$@"
     do
@@ -12,15 +13,15 @@ function ui_elements (){
                 filter_files "${arg#*=}"            
                 shift
             ;;
-            --type_db)
-                shift             
-                #type_database="${arg#*=}"                
-                while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
-                    type_database+=("$1")
-                    shift
-                done                
+            # --type_db)
+            #     shift             
+            #     #type_database="${arg#*=}"                
+            #     while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
+            #         type_database+=("$1")
+            #         shift
+            #     done                
                 
-            ;;
+            # ;;
             --tables)
                 shift                
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
@@ -47,6 +48,14 @@ function find_files_java() {
         DatabaseName+=("$database_name")
         username+=($(echo "$file_content" | grep "username" | sed 's/.*=//'))
         password+=($(echo "$file_content" | grep "password" | sed 's/.*=//'))
+        # Extract database type from JDBC URL
+        type_database+=($(echo "$file_url" | sed -n 's/.*jdbc:\([^:]*\):.*/\1/p'))
+        if [ -z "${type_database[-1]}" ]; then
+            type_database[-1]="java"
+            echo "No se pudo detectar el tipo de base de datos, usando 'java' por defecto"
+        else
+            echo "Tipo de base de datos detectado: ${type_database[-1]}"
+        fi
         #echo "Usuario: $username"
         #echo "Contraseña: ${password[@]}"
         #echo DatabaseName="$DatabaseName"
@@ -90,7 +99,7 @@ function parcer_data_input(){
         echo "+++++++++${password[2]}"
         echo ""
         echo "---${DatabaseName[@]}"
-        echo "----------------------------"
+        echo "----------Type DB--------------"
         echo "----------${type_database[0]}"
         echo "----------${type_database[1]}"
         echo "----------${type_database[2]}"

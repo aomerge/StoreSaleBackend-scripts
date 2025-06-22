@@ -9,8 +9,8 @@ for dir in ../db/*/; do
         sql_directories+=("${dir}tables")
         type_database+=("$(basename "$dir")")
     fi
-    echo "Directorio encontrado: $dir"
-    echo "Directorio encontrado: ${type_database[@]}"
+    #echo "Directorio encontrado: $dir"
+    #echo "Directorio encontrado: ${type_database[@]}"
 done    
 
 function ui_elements (){
@@ -75,6 +75,7 @@ function check_sql_files() {
 }
 function find_config_file() {
     local config_file="./obs/find_config_file.sh"
+    
     if [ -f "$config_file" ]; then                
         chmod +x "$config_file"        
         "$config_file" --type="$type_env" --tables "${sql_tables[@]}" --type_db "${type_database[@]}" --db="${DatabaseName[@]}"        
