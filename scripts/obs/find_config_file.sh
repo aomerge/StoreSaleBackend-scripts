@@ -89,24 +89,24 @@ function filter_files() {
 function parcer_data_input(){
     # Iterate through each database
         DatabaseName=($(echo "${DatabaseName[@]}" | tr ' ' '\n' | sort -u))  # Remove duplicates and sort
-        echo ""
-        echo "----------${username[0]}"
-        echo "----------${username[1]}"
-        echo "----------${username[2]}"
-        echo ""
-        echo "+++++++++${password[0]}"
-        echo "+++++++++${password[1]}"
-        echo "+++++++++${password[2]}"
-        echo ""
-        echo "---${DatabaseName[@]}"
-        echo "----------Type DB--------------"
-        echo "----------${type_database[0]}"
-        echo "----------${type_database[1]}"
-        echo "----------${type_database[2]}"
-        echo "----------------------------"
-        echo "---Conectando a lasdatos 1: ${DatabaseName[0]}"
-        echo "---Conectando a lasdatos 2: ${DatabaseName[1]}"
-        echo "---Conectando a lasdatos 3: ${DatabaseName[2]}"
+        # echo ""
+        # echo "----------${username[0]}"
+        # echo "----------${username[1]}"
+        # echo "----------${username[2]}"
+        # echo ""
+        # echo "+++++++++${password[0]}"
+        # echo "+++++++++${password[1]}"
+        # echo "+++++++++${password[2]}"
+        # echo ""
+        # echo "---${DatabaseName[@]}"
+        # echo "----------Type DB--------------"
+        # echo "----------${type_database[0]}"
+        # echo "----------${type_database[1]}"
+        # echo "----------${type_database[2]}"
+        # echo "----------------------------"
+        # echo "---Conectando a lasdatos 1: ${DatabaseName[0]}"
+        # echo "---Conectando a lasdatos 2: ${DatabaseName[1]}"
+        # echo "---Conectando a lasdatos 3: ${DatabaseName[2]}"
 }
 
 function connect_to_db() {
@@ -129,12 +129,10 @@ function connect_to_db() {
         parcer_data_input        
         for i in "${!DatabaseName[@]}"; do
             echo "Conectando a las bases de datos: ${DatabaseName[$i]} - [$i]"
+            echo "Usuario: -----------------------------------------------------------"
             if [ ${#type_database[@]} -gt 0 ]; then
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[@]}" --tables "${TableName[@]}"
-            else
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --tables "${TableName[@]}"
-            fi
-            
+                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[$i]}" --tables "${TableName[@]}"            
+            fi            
             if [ $? -ne 0 ]; then
                 echo "❌ Error: No se pudo conectar a la base de datos ${DatabaseName[$i]}."
                 exit 1

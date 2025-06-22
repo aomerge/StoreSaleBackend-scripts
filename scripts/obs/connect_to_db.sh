@@ -11,17 +11,17 @@ function ui_elements (){
             --db=*)                
                 
                 DatabaseName="${arg#*=}"
-                #echo "Base de datos: $DatabaseName"
+                echo "Base de datos: $DatabaseName"
                 shift
             ;;
             --user=*)
                 userName="${arg#*=}"
-                #echo "Usuario: $userName"
+                echo "Usuario: $userName"
                 shift                            
             ;;        
             --password=*)
                 password="${arg#*=}"
-                #echo "Contraseña: $password"
+                echo "Contraseña: $password"
                 shift                                                   
             ;;    
             --tables | --table)
@@ -31,7 +31,7 @@ function ui_elements (){
                     TableName+=("$1")
                     shift
                 done
-                #echo "Tablas especificadas: ${TableName[@]}"
+                echo "Tablas especificadas: ${TableName[@]}"
             ;;
             --type)
                 shift
@@ -49,14 +49,9 @@ function ui_elements (){
 
 
 function check_type_database() {
-    if [[ "${type_database[@]}" == "postgress" ]]; then
-        find_files_java            
-    elif [[ "${type_database[@]}" == "sqlserver" ]]; then
-        find_files_sqlserver    
-    else
-        echo "Tipo de base de datos no soportado: ${type_database[@]}"
-        exit 1
-    fi
+  echo "-------------------------------------------"
+       
 }
 
 ui_elements "$@"
+check_type_database
