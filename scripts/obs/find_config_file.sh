@@ -4,8 +4,6 @@ DatabaseName=()
 username=()
 password=()
 type_database=()
-number_of_databases
-exec_number
 
 function ui_elements (){
     for arg in "$@"
@@ -15,7 +13,12 @@ function ui_elements (){
                 echo "Tipo de configuración: ${arg#*=}"
                 filter_files "${arg#*=}"            
                 shift
-            ;;                        
+            ;;       
+            --exec=*)
+                exec_number="${arg#*=}"
+                #echo "Número de ejecución: $exec_number"
+                shift
+            ;;                 
             --tables)
                 shift                
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
@@ -110,14 +113,15 @@ function connect_to_db() {
         echo "Error: No se proporcionó el nombre de la base de datos."
         exit 1
     fi
-    
     # Validate if database connection parameters are available
     if [ ${#username[@]} -eq 0 ] || [ ${#password[@]} -eq 0 ]; then
         echo "Error: Credenciales de base de datos incompletas."
         exit 1
     fi
+
     local config_file="./obs/connect_to_db.sh"
     exec_index=0
+
     if [ -f "$config_file" ]; then
         chmod +x "$config_file"                
         parcer_data_input        
@@ -125,31 +129,23 @@ function connect_to_db() {
             echo "Conectando a las bases de datos: ${DatabaseName[$i]} - [$i]"
             echo "Usuario: -----------------------------------------------------------"
 
-            files=($(ls "../db/" | sort -u | grep -E "${type_database[$i]}"))
-            echo "Archivos encontrados: ${files[@]}"
+            files=($(ls "../db/" | sort -u | grep -E "${type_database[$i]}"))            
 
             if [ ${#files[@]} -gt 1 ]; then                
-                exec_index=$((exec_index + 1))   
-                echo "Índice de ejecución: $exec_index"                     
+                exec_index=$((exec_index + 1))                                    
             else
-                echo "Se encontró un archivo o ninguno: ${#files[@]}"
-                # Ejecutar acción cuando hay un archivo o menos
-                if [ ${#files[@]} -eq 1 ]; then
-                    echo "Procesando archivo único: ${files[0]}"
-                else
-                    echo "No se encontraron archivos"
-                fi
+                echo "Se encontró un archivo o ninguno: ${#files[@]}"                                
             fi
 
-            local folder_name="${type_database[$i]}"
-            if [ $exec_index -ne 0 ]; then
+            local folder_name="${type_database[$i]}"            
+            if [ $exec_index -gt 1 ]; then
                 folder_name="${type_database[$i]}-${exec_index}"
-            fi
+            fi            
 
             echo "Nombre de carpeta a usar: $folder_name"
 
             if [ ${#type_database[@]} -gt 0 ]; then
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[$i]}" --exec_index "$exec_index" --folder_name "$folder_name" --file "${files[0]}"      
+                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${folder_name}" --exec="$exec_number"
             fi           
 
             if [ $? -ne 0 ]; then

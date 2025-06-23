@@ -12,6 +12,11 @@ function ui_elements (){
                 type_env="${arg#*=}"
                 shift
             ;;
+            --exec=*)
+                exec_number="${arg#*=}"
+                #echo "Número de ejecución: $exec_number"
+                shift
+            ;;
             *)
                 echo "Argumento no reconocido: $arg"
                 echo "Uso: $0 [db=database_name]"
@@ -20,24 +25,12 @@ function ui_elements (){
         esac
     done
 }
-
-function print_usage() {
-    echo "Uso: $0 [db=database_name]"
-}
-
-function check_sql_files() {
-    echo "Buscando archivos SQL en las carpetas de tablas..."
-    for dir in "${sql_directories[@]}"; do
-        db_type=$(basename "$(dirname "$dir")")
-        search_sql_files "$dir" "$db_type"
-    done        
-}
 function find_config_file() {
     local config_file="./obs/find_config_file.sh"
 
     if [ -f "$config_file" ]; then                
         chmod +x "$config_file"        
-        "$config_file" --type="$type_env" --type_db "${type_database[@]}" --db="${DatabaseName[@]}"        
+        "$config_file" --type="$type_env" --type_db "${type_database[@]}" --db="${DatabaseName[@]}" --exec="$exec_number"       
         if [ $? -ne 0 ]; then
             echo "❌ Error: No se pudo ejecutar el script de configuración."
             exit 1
@@ -53,5 +46,4 @@ function find_config_file() {
 
 
 ui_elements "$@"
-#check_sql_files
 find_config_file

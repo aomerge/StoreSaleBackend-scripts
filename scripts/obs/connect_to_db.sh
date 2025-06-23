@@ -23,7 +23,16 @@ function ui_elements (){
                 password="${arg#*=}"
                 echo "Contraseña: $password"
                 shift                                                   
-            ;;                
+            ;;
+            --exec=*)
+                exec_number="${arg#*=}"
+                echo "Número de ejecución: $exec_number"
+                if [[ ! $exec_number =~ ^[0-9]+$ ]]; then
+                    echo "❌ Error: El número de ejecución debe ser un número entero."
+                    exit 1
+                fi                
+                shift
+            ;;
             --type)
                 shift
                 type_database=()
@@ -36,49 +45,37 @@ function ui_elements (){
         esac
     done
 }
+ 
 
-function search_sql_files() {    
-    if [ -z "$1" ] || [ -z "$2" ]; then
-        echo "❌ Error: Argumentos inválidos proporcionados."
-        echo "   Se requieren tanto el directorio como el tipo de base de datos."
-        print_usage
-        return 1
+function exec_run_command() {
+    case $exec_number in
+    1)
+        echo "✅ Ejecutando operación número 1"
+    ;;
+    2)
+        echo "✅ Ejecutando operación número 2"
+    ;;
+    *)
+        echo "❌ Error: El número de ejecución debe ser 1 o 2."
         exit 1
-    fi
-    local dir="$1"
-    local db_type="$2"
-    echo "🔍 Procesando base de datos: $db_type"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-    input_files=$(find "$dir" -maxdepth 1 -type f -name "*.sql" -exec basename {} \;)
-    #input_files=$(echo "$input_files" | sed 's/\.sql//g')    
-    sql_tables+=("$db_type")
-
-    if [ -z "$input_files" ]; then
-        echo "❌ Error: No se encontraron archivos SQL en $dir"
-        echo "   Asegúrate de que existan archivos .sql en el directorio."
-        return 1
-        exit 1
-    else
-        sql_tables+=("$input_files")        
-        echo "📁 Archivos encontrados:"
-        echo "$input_files" | while IFS= read -r file; do                        
-            echo "  ✓ $file"
-        done
-    fi
-    echo ""
-}
-function check_sql_files() {
-    echo "Buscando archivos SQL en las carpetas de tablas..."
-    for dir in "${sql_directories[@]}"; do
-        db_type=$(basename "$(dirname "$dir")")
-        search_sql_files "$dir" "$db_type"
-    done    
+    ;;
+    esac
 }
 
+function docker_exec(){
+
+}
+
+function sql_exec() {}
 
 function check_type_tables() {
-  ls "../db/${type_database}/tables/"
+    echo "Tablas a crear:"
+    for table_file in "../db/${type_database}/tables/"*.sql; do
+        if [ -f "$table_file" ]; then
+            TableName+=("$table_file")
+        fi
+    done
+    echo "- ${TableName[@]}"
   echo "-------------------------------------------"
        
 }
