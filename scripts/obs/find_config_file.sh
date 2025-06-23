@@ -1,8 +1,11 @@
+#!/bin/bash
 TableName=()
 DatabaseName=()
 username=()
 password=()
 type_database=()
+number_of_databases
+exec_number
 
 function ui_elements (){
     for arg in "$@"
@@ -12,16 +15,7 @@ function ui_elements (){
                 echo "Tipo de configuración: ${arg#*=}"
                 filter_files "${arg#*=}"            
                 shift
-            ;;
-            # --type_db)
-            #     shift             
-            #     #type_database="${arg#*=}"                
-            #     while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
-            #         type_database+=("$1")
-            #         shift
-            #     done                
-                
-            # ;;
+            ;;                        
             --tables)
                 shift                
                 while [[ $# -gt 0 && ! $1 =~ ^-- ]]; do
@@ -39,12 +33,12 @@ function find_files_java() {
     file_env=($(ls "$file_dir"*.properties 2>/dev/null))
     if [ ${#file_env[@]} -gt 0 ]; then
         file_content=$(cat "${file_env[@]}" | grep "datasource")
-        file_url=$(echo "$file_content" | grep "url")                
+        file_url=$(echo "$file_content" | grep "url")  
         database_name=$(echo "$file_url" | sed -n 's/.*databaseName=\([^;]*\).*/\1/p; s/.*\/\([^/?]*\).*/\1/p')
         if [ -z "$database_name" ]; then
             echo "No se pudo extraer el nombre de la base de datos."
             exit 1
-        fi
+        fi    
         DatabaseName+=("$database_name")
         username+=($(echo "$file_content" | grep "username" | sed 's/.*=//'))
         password+=($(echo "$file_content" | grep "password" | sed 's/.*=//'))
@@ -88,7 +82,7 @@ function filter_files() {
 
 function parcer_data_input(){
     # Iterate through each database
-        DatabaseName=($(echo "${DatabaseName[@]}" | tr ' ' '\n' | sort -u))  # Remove duplicates and sort
+        DatabaseName=($(echo "${DatabaseName[@]}" | tr ' ' '\n' | sort -u))  # Remove duplicates and sort                
         # echo ""
         # echo "----------${username[0]}"
         # echo "----------${username[1]}"
@@ -123,16 +117,41 @@ function connect_to_db() {
         exit 1
     fi
     local config_file="./obs/connect_to_db.sh"
-
+    exec_index=0
     if [ -f "$config_file" ]; then
         chmod +x "$config_file"                
         parcer_data_input        
         for i in "${!DatabaseName[@]}"; do
             echo "Conectando a las bases de datos: ${DatabaseName[$i]} - [$i]"
             echo "Usuario: -----------------------------------------------------------"
+
+            files=($(ls "../db/" | sort -u | grep -E "${type_database[$i]}"))
+            echo "Archivos encontrados: ${files[@]}"
+
+            if [ ${#files[@]} -gt 1 ]; then                
+                exec_index=$((exec_index + 1))   
+                echo "Índice de ejecución: $exec_index"                     
+            else
+                echo "Se encontró un archivo o ninguno: ${#files[@]}"
+                # Ejecutar acción cuando hay un archivo o menos
+                if [ ${#files[@]} -eq 1 ]; then
+                    echo "Procesando archivo único: ${files[0]}"
+                else
+                    echo "No se encontraron archivos"
+                fi
+            fi
+
+            local folder_name="${type_database[$i]}"
+            if [ $exec_index -ne 0 ]; then
+                folder_name="${type_database[$i]}-${exec_index}"
+            fi
+
+            echo "Nombre de carpeta a usar: $folder_name"
+
             if [ ${#type_database[@]} -gt 0 ]; then
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[$i]}" --tables "${TableName[@]}"            
-            fi            
+                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${type_database[$i]}" --exec_index "$exec_index" --folder_name "$folder_name" --file "${files[0]}"      
+            fi           
+
             if [ $? -ne 0 ]; then
                 echo "❌ Error: No se pudo conectar a la base de datos ${DatabaseName[$i]}."
                 exit 1
