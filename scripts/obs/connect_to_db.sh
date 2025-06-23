@@ -62,11 +62,7 @@ function exec_run_command() {
     esac
 }
 
-function docker_exec(){
 
-}
-
-function sql_exec() {}
 
 function check_type_tables() {
     echo "Tablas a crear:"
