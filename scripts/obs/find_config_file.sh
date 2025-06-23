@@ -3,6 +3,7 @@ TableName=()
 DatabaseName=()
 username=()
 password=()
+port=()
 type_database=()
 
 function ui_elements (){
@@ -45,6 +46,8 @@ function find_files_java() {
         DatabaseName+=("$database_name")
         username+=($(echo "$file_content" | grep "username" | sed 's/.*=//'))
         password+=($(echo "$file_content" | grep "password" | sed 's/.*=//'))
+        port+=($(echo "$file_url" | sed -n 's/.*:\([0-9]*\).*/\1/p'))
+        echo "post :${port[@]}"
         # Extract database type from JDBC URL
         type_database+=($(echo "$file_url" | sed -n 's/.*jdbc:\([^:]*\):.*/\1/p'))
         if [ -z "${type_database[-1]}" ]; then
@@ -86,24 +89,9 @@ function filter_files() {
 function parcer_data_input(){
     # Iterate through each database
         DatabaseName=($(echo "${DatabaseName[@]}" | tr ' ' '\n' | sort -u))  # Remove duplicates and sort                
-        # echo ""
-        # echo "----------${username[0]}"
-        # echo "----------${username[1]}"
-        # echo "----------${username[2]}"
-        # echo ""
-        # echo "+++++++++${password[0]}"
-        # echo "+++++++++${password[1]}"
-        # echo "+++++++++${password[2]}"
-        # echo ""
-        # echo "---${DatabaseName[@]}"
-        # echo "----------Type DB--------------"
-        # echo "----------${type_database[0]}"
-        # echo "----------${type_database[1]}"
-        # echo "----------${type_database[2]}"
-        # echo "----------------------------"
-        # echo "---Conectando a lasdatos 1: ${DatabaseName[0]}"
-        # echo "---Conectando a lasdatos 2: ${DatabaseName[1]}"
-        # echo "---Conectando a lasdatos 3: ${DatabaseName[2]}"
+        userName=$(echo "$userName" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        password=$(echo "$password" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        DatabaseName=$(echo "$DatabaseName" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
 }
 
 function connect_to_db() {
@@ -145,7 +133,7 @@ function connect_to_db() {
             echo "Nombre de carpeta a usar: $folder_name"
 
             if [ ${#type_database[@]} -gt 0 ]; then
-                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${folder_name}" --exec="$exec_number"
+                "$config_file" --db="${DatabaseName[$i]}" --user="${username[$i]}" --password="${password[$i]}" --type "${folder_name}" --exec="$exec_number" --port="${port[$i]}"
             fi           
 
             if [ $? -ne 0 ]; then
